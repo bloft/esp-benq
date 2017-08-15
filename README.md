@@ -5,6 +5,11 @@ This is a sketch for controling/reading a benq projector using an esp8266, and t
 ## Requirements
 Install https://github.com/bloft/EasyMqtt as a library
 
+## Hardware
+The hardware consistes of A Wemos D1 Mini, Wemos proto shield, and a RS232 board
+
+![hardware](hardware.jpg)
+
 ## Example mqtt data
 
 ```
