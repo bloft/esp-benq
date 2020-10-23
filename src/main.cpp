@@ -1,11 +1,8 @@
 #include <SoftwareSerial.h>
 #include "config.h"
 #include <EasyMqtt.h>
-#include <RemoteDebug.h>
 
 SoftwareSerial benqSerial(D7, D8, false, 256);
-
-RemoteDebug Debug;
 
 String readContent(int maxLength) {
 	String result = "";
@@ -20,15 +17,10 @@ String readContent(int maxLength) {
 		result = result.substring(result.indexOf("*"), result.indexOf("#")+1);
 		return result;
 	} else {
-    Debug.print("Result: ");
-    Debug.println(result);
-		Debug.println("Failed - Reading avalible data");
 		// Invalid data, empth serial buffer
 		while (benqSerial.available() > 0) {
 			char c = (char)benqSerial.read();
-			Debug.print(c);
 		}
-    Debug.println();
 	}
 	return "";
 }
@@ -39,7 +31,6 @@ String readContent(int maxLength) {
  */
 bool set(String cmd, String value) {
 	String command = ("\r*"+cmd+"="+value+"#\r");
-	Debug.println(command);
 	benqSerial.print(command);
 	delay(10);
 	String result = readContent(command.length());
@@ -56,16 +47,8 @@ String get(String cmd) {
 		if(result.indexOf("*") >= 0 && result.indexOf("#") > 0) {
 			result = result.substring(result.indexOf("*")+1, result.indexOf("#"));
 			if(result.indexOf("=") > 0) {
-        Debug.print("Success: ");
-        Debug.println(result.substring(result.indexOf("=")+1));
 				return result.substring(result.indexOf("=")+1);
-			} else {
-        Debug.println("Failed - Missing =");
-        Debug.println(result);
 			}
-		} else {
-      Debug.println("Failed - Missing */#");
-      Debug.println(result);
 		}
 	}
 	return "";
@@ -77,11 +60,8 @@ void setup() {
 	Serial.begin(115200);
 	benqSerial.begin(115200);
 
-  Debug.begin("Telnet_HostName");
-  Debug.setResetCmdEnabled(true);
-
 	mqtt.wifi(wifi_ssid, wifi_pass);
-	mqtt.mqtt(mqtt_server, mqtt_port, mqtt_user, mqtt_pass);
+	mqtt.mqtt(mqtt_server, mqtt_port, mqtt_user, mqtt_password);
 
 	mqtt.setInterval(15);
 
@@ -124,5 +104,4 @@ void setup() {
 
 void loop() {
 	mqtt.loop();
-  Debug.handle();
 }
